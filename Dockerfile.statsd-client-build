@@ -1,0 +1,4 @@
+FROM rackattack-nas.dc1:5000/dev-base:6c2e88ef9ade83d5d6b70ba4badf25cff1bad98e
+
+RUN yum install -y cmake
+RUN yum install -y ccache
