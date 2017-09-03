@@ -1,0 +1,7 @@
+FROM rackattack-nas.dc1:5000/dev-base:6c2e88ef9ade83d5d6b70ba4badf25cff1bad98e
+# FROM rackattack-nas.dc1:5000/dev-base:176ade6f479c4109fca18a828b380bf83fc3e293
+
+RUN yum install -y cmake
+RUN yum install -y ccache
+RUN mkdir -p /etc/stratoscale
+# COPY etc/rpc.conf /etc/stratoscale/rpc.conf
