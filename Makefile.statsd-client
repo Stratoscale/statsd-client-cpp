@@ -1,5 +1,5 @@
 
-all: build_lib submit
+all: build_lib unittests submit
 
 build_lib:
 	rm -rf build build_lib
@@ -9,8 +9,12 @@ build_lib:
 	cp build/libstatsdcppclient.a build_lib/
 	cp src/statsd_client.h build_lib/
 
+unittests:
+	cd build && ./test_client
+
 submit: build_lib
 	solvent submitproduct lib build_lib
+
 
 clean:
 	rm -rf build build_lib
