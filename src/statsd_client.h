@@ -24,7 +24,7 @@ public:
     // you can config at anytime; client will use new address (useful for Singleton)
     void config(const std::string& host, int port, const std::string& ns = "");
     const char* errmsg();
-    int send_to_daemon(const std::string &);
+    int send_to_daemon(const std::string & message);
 
 public:
     int inc(const std::string& key, float sample_rate = 1.0);
