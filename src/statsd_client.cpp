@@ -11,6 +11,7 @@
 using namespace std;
 namespace statsd {
 
+
 inline bool fequal(float a, float b)
 {
     const float epsilon = 0.0001;
@@ -43,7 +44,8 @@ struct _StatsdClientData {
 StatsdClient::StatsdClient(const string& host,
                            int port,
                            const string& ns,
-                           const bool batching)
+                           const bool batching,
+                           const int queue_wait_ms)
 : batching_(batching), exit_(false)
 {
     d = new _StatsdClientData;
@@ -66,7 +68,7 @@ StatsdClient::StatsdClient(const string& host,
                   staged_message_queue.pop_front();
               }
 
-              std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+              std::this_thread::sleep_for(std::chrono::milliseconds(queue_wait_ms));
           }
         });
     }
@@ -155,30 +157,30 @@ void StatsdClient::cleanup(string& key)
 
 int StatsdClient::dec(const string& key, float sample_rate)
 {
-    return count(key, -1, sample_rate);
+    return count(key, double(-1), sample_rate);
 }
 
 int StatsdClient::inc(const string& key, float sample_rate)
 {
-    return count(key, 1, sample_rate);
+    return count(key, double(1), sample_rate);
 }
 
-int StatsdClient::count(const string& key, size_t value, float sample_rate)
+int StatsdClient::count(const string& key, double value, float sample_rate)
 {
     return send(key, value, "c", sample_rate);
 }
 
-int StatsdClient::gauge(const string& key, size_t value, float sample_rate)
+int StatsdClient::gauge(const string& key, double value, float sample_rate)
 {
     return send(key, value, "g", sample_rate);
 }
 
-int StatsdClient::timing(const string& key, size_t ms, float sample_rate)
+int StatsdClient::timing(const string& key, double ms, float sample_rate)
 {
     return send(key, ms, "ms", sample_rate);
 }
 
-int StatsdClient::send(string key, size_t value, const string &type, float sample_rate)
+int StatsdClient::send(string key, double value, const string &type, float sample_rate)
 {
     if (!should_send(sample_rate)) {
         return 0;
@@ -189,12 +191,12 @@ int StatsdClient::send(string key, size_t value, const string &type, float sampl
     char buf[256];
     if ( fequal( sample_rate, 1.0 ) )
     {
-        snprintf(buf, sizeof(buf), "%s%s:%zd|%s",
+        snprintf(buf, sizeof(buf), "%s%s:%.2f|%s",
                  d->ns.c_str(), key.c_str(), value, type.c_str());
     }
     else
     {
-        snprintf(buf, sizeof(buf), "%s%s:%zd|%s|@%.2f",
+        snprintf(buf, sizeof(buf), "%s%s:%.2f|%s|@%.2f",
                  d->ns.c_str(), key.c_str(), value, type.c_str(), sample_rate);
     }
 

@@ -13,11 +13,13 @@
 
 namespace statsd {
 
+#define DEFAULT_QUEUE_WAIT_MS 1000
+
 struct _StatsdClientData;
 
 class StatsdClient {
 public:
-    StatsdClient(const std::string& host="127.0.0.1", int port=8125, const std::string& ns = "", const bool batching = false);
+    StatsdClient(const std::string& host="127.0.0.1", int port=8125, const std::string& ns = "", const bool batching = false, const int queue_wait_ms = DEFAULT_QUEUE_WAIT_MS);
     ~StatsdClient();
 
 public:
@@ -29,9 +31,9 @@ public:
 public:
     int inc(const std::string& key, float sample_rate = 1.0);
     int dec(const std::string& key, float sample_rate = 1.0);
-    int count(const std::string& key, size_t value, float sample_rate = 1.0);
-    int gauge(const std::string& key, size_t value, float sample_rate = 1.0);
-    int timing(const std::string& key, size_t ms, float sample_rate = 1.0);
+    int count(const std::string& key, double value, float sample_rate = 1.0);
+    int gauge(const std::string& key, double value, float sample_rate = 1.0);
+    int timing(const std::string& key, double ms, float sample_rate = 1.0);
 
 public:
     /**
@@ -43,7 +45,7 @@ public:
     /* (Low Level Api) manually send a message
      * type = "c", "g" or "ms"
      */
-    int send(std::string key, size_t value,
+    int send(std::string key, double value,
              const std::string& type, float sample_rate);
 
 protected:

@@ -12,7 +12,7 @@ int main(void)
 
     client.count("count1", 123, 1.0);
     client.count("count2", 125, 1.0);
-    client.gauge("speed", 10);
+    client.gauge("speed", 10.0);
     int i;
     for (i=0; i<1000; i++)
         client2.timing("request", i);
