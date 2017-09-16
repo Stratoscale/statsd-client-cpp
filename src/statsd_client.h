@@ -19,7 +19,7 @@ struct _StatsdClientData;
 
 class StatsdClient {
 public:
-    StatsdClient(const std::string& host="127.0.0.1", int port=8125, const std::string& ns = "", const bool batching = false, const int queue_wait_ms = DEFAULT_QUEUE_WAIT_MS);
+    StatsdClient(const std::string& host="127.0.0.1", int port=8125, const std::string& ns = "", const bool batching = false, bool debug_=true);
     ~StatsdClient();
 
 public:
@@ -51,12 +51,14 @@ public:
 protected:
     int init();
     void cleanup(std::string& key);
+    void debug(const std::string & msg);
 
 protected:
     struct _StatsdClientData* d;
 
     bool batching_;
     bool exit_;
+    bool debug_;
     pthread_spinlock_t batching_spin_lock_;
     std::thread batching_thread_;
     std::deque<std::string> batching_message_queue_;

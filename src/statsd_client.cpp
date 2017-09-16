@@ -45,8 +45,8 @@ StatsdClient::StatsdClient(const string& host,
                            int port,
                            const string& ns,
                            const bool batching,
-                           const int queue_wait_ms)
-: batching_(batching), exit_(false)
+                           bool debug)
+: batching_(batching), exit_(false), debug_(debug)
 {
     d = new _StatsdClientData;
     d->sock = -1;
@@ -68,7 +68,7 @@ StatsdClient::StatsdClient(const string& host,
                   staged_message_queue.pop_front();
               }
 
-              std::this_thread::sleep_for(std::chrono::milliseconds(queue_wait_ms));
+              std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_QUEUE_WAIT_MS));
           }
         });
     }
@@ -223,7 +223,7 @@ int StatsdClient::send(const string &message)
 
 
 int StatsdClient::send_to_daemon(const string &message) {
-    std::cout << "send_to_daemon: " << message.length() << " B" << std::endl;
+    debug(std::string("send_to_daemon") + std::to_string(message.length()) + std::string(" B"));
     int ret = init();
     if ( ret )
     {
@@ -242,6 +242,13 @@ int StatsdClient::send_to_daemon(const string &message) {
 const char* StatsdClient::errmsg()
 {
     return d->errmsg;
+}
+
+void StatsdClient::debug(const std::string & msg) {
+    if(debug_)
+    {
+        std::cout << msg << std::endl;
+    }
 }
 
 }
