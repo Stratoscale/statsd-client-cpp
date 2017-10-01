@@ -3,3 +3,5 @@ build-container-image: statsd-client-build
 
 make:
     makefile: Makefile.statsd-client
+
+SOLVENT_CLEAN: True
