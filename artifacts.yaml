@@ -1,1 +1,10 @@
-version: 1
+version: 2
+
+rpms_dir: build_lib
+
+services:
+    statsd-client-cpp:
+        containerized: false
+        rpms:
+            - build_lib/libstatsdcppclient.a
+            - build_lib/statsd_client.h

@@ -1,5 +1,5 @@
 
-all: build_lib unittests submit
+all: build_lib unittests
 
 build_lib:
 	rm -rf build build_lib
