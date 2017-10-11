@@ -8,6 +8,7 @@
 #include <pthread.h>
 #include <string>
 #include <thread>
+#include <condition_variable>
 #include <deque>
 #include <iostream>
 
@@ -62,6 +63,7 @@ protected:
     pthread_spinlock_t batching_spin_lock_;
     std::thread batching_thread_;
     std::deque<std::string> batching_message_queue_;
+    std::condition_variable interrupting_cv;
     const uint64_t max_batching_size = 32768;
 };
 

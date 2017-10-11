@@ -3,6 +3,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <mutex>
 #include <string.h>
 #include <stdio.h>
 #include <netinet/in.h>
@@ -56,6 +57,9 @@ StatsdClient::StatsdClient(const string& host,
     if (batching_) {
         pthread_spin_init(&batching_spin_lock_, PTHREAD_PROCESS_PRIVATE);
         batching_thread_ = std::thread([this] {
+        std::mutex cv_mutex;
+        std::unique_lock<std::mutex> cv_lock(cv_mutex, std::defer_lock);
+
           while (!exit_) {
               std::deque<std::string> staged_message_queue;
 
@@ -68,7 +72,10 @@ StatsdClient::StatsdClient(const string& host,
                   staged_message_queue.pop_front();
               }
 
-              std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_QUEUE_WAIT_MS));
+              cv_lock.lock();
+              interrupting_cv.wait_for(cv_lock, std::chrono::milliseconds(DEFAULT_QUEUE_WAIT_MS));
+              cv_lock.unlock();
+              // std::this_thread::sleep_for(std::chrono::milliseconds(DEFAULT_QUEUE_WAIT_MS));
           }
         });
     }
@@ -78,8 +85,12 @@ StatsdClient::~StatsdClient()
 {
     if (batching_) {
         exit_ = true;
+        interrupting_cv.notify_all();
         batching_thread_.join();
         pthread_spin_destroy(&batching_spin_lock_);
+        //pthread_spin_lock(&batching_spin_lock_);
+        //pthread_spin_unlock(&batching_spin_lock_);
+        //pthread_spin_destroy(&batching_spin_lock_);
     }
 
 
